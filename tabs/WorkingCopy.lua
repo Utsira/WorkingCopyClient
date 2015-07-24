@@ -58,7 +58,7 @@ local function commitMultiFile()
         local tab=readProjectTab(tabName)
         --convert tab README to .md and place in root
         if string.find(tabName, "^README") then
-            tab=string.match(tab, "^%s-%-%-%[%[(.-)%]%]") --strip out --[[ ]]
+            tab=string.match(tab, "^%s-%-%-%[=-%[(.-)%]=-%]") --strip out --[[ ]], --[=[, ]=]
             tabName = tabName..".md"
         else  --place in folder tabs
             tabName = "tabs/"..tabName..".lua"

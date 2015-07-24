@@ -22,10 +22,8 @@ A light Codea client for committing code to Working Copy, a full iOS Git client.
 
 3. You now have the choice to "Commit as single file" or as "multiple files":
 
-  - "single file" concatenates your project using Codea's "paste into project" format <--# tab name> and pushes it to the "Codea" repository in Working Copy, naming the file after its Codea project name.[^note1] This is appropriate for smaller projects. To restore a previous version, you can copy the file from Working Copy (share pane > Copy), and in Codea, "paste into project"
+  - "single file" concatenates your project using Codea's "paste into project" format `--# tab name` and pushes it to the "Codea" repository in Working Copy, naming the file after its Codea project name.[^note1] This is appropriate for smaller projects. To restore a previous version, you can copy the file from Working Copy (share pane > Copy), and in Codea, "paste into project"
 
   - "multiple file" writes each tab as a separate file into a folder called "tabs" in a repository named after the project[^note1]. You'll get an error message if no repository with that name is found. This is best practice for larger projects. The downside is that there is currently no easy way to restore a multi-file project from Working Copy back to Codea. This could change if Codea gets iOS 8 "open in"/ share pane functionality.  To "pull", you'll currently have to use one of the other Git Codea clients, such as the excellent Codea-SCM.
 
-[^note1]: The project name is found by looking for the "-- <project name>" string that Codea places at the top of the Main tab. Make sure you don't put anything before this in the Main tab
-
-  
+Special bonus feature: if your project has a tab named README with some text surrounded by `--[[ 
