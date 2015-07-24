@@ -26,7 +26,7 @@ A light Codea client for committing code to Working Copy, a full iOS Git client.
 
   - "multiple file" writes each tab as a separate file into a folder called "tabs" in a repository named after the project[^note1]. You'll get an error message if no repository with that name is found. This is best practice for larger projects. The downside is that there is currently no easy way to restore a multi-file project from Working Copy back to Codea. This could change if Codea gets iOS 8 "open in"/ share pane functionality.  To "pull", you'll currently have to use one of the other Git Codea clients, such as the excellent Codea-SCM.
 
-Special bonus feature: if your project has a tab named README with some text surrounded by `--\[\[ \]\]`, Working Copy Client will strip out the braces and save the tab in the root level of the repository with a .md extension.
+Special bonus feature: if your project has a tab named README with some text surrounded by --\[\[ \]\], Working Copy Client will strip out the braces and save the tab in the root level of the repository with a .md extension.
 
 [^note1]: The project name is found by looking for the `-- <project name>` string that Codea places at the top of the Main tab. Make sure you don't put anything before this in the Main tab
 
