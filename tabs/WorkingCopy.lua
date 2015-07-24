@@ -23,8 +23,8 @@ local function commitSingleFile()
         tabString = tabString.."--# "..tabName.."\n"..tab.."\n\n"
         print(i,tabName)
     end
-  --  tabString = urlencode(tabString) --encode if passing code in URL, using &text="..tabString
-    pasteboard.copy(tabString) --avoid encoding by placing code in pasteboard
+    tabString = urlencode(tabString) --encode if passing code in URL, using &text="..tabString
+   -- pasteboard.copy(tabString) --avoid encoding by placing code in pasteboard
     
     --get project name
     local projectName = urlencode(string.match(readProjectTab("Main"), "^%s*%-%-%s*(.-)\n") or "My Project")
@@ -33,9 +33,9 @@ local function commitSingleFile()
     local commitEncode = urlencode(commitMessage)
     --build URL chain, starting from end
    -- local openPageURL = "working-copy://open?repo=Codea&path="..projectName..".lua&mode=content"
-    local commitURL = urlencode("working-copy://x-callback-url/commit/?key="..workingCopyKey.."&repo=Codea&path="..projectName..".lua&limit=1&message="..commitEncode.."&x-success="..urlencode("codea://")) --to chain urls, must be double-encoded. .."&x-success="..openPageURL
+    local commitURL = urlencode("working-copy://x-callback-url/commit/?key="..workingCopyKey.."&repo=Codea&path="..projectName..".lua&limit=1&message="..commitEncode) --to chain urls, must be double-encoded. .."&x-success="..urlencode("codea://")
     
-    local totalURL = "working-copy://x-callback-url/write/?key="..workingCopyKey.."&repo=Codea&path="..projectName..".lua&uti=public.txt&x-success="..commitURL --&text="..tabString..
+    local totalURL = "working-copy://x-callback-url/write/?key="..workingCopyKey.."&repo=Codea&path="..projectName..".lua&uti=public.txt&text="..tabString.."&x-success="..commitURL --
     openURL(totalURL) 
     print(totalURL)
     print(projectName.." saved")
@@ -74,7 +74,6 @@ local function commitMultiFile()
 
     print(projectName.." saved")
 end
-
 
 local function WorkingCopyClient()
     parameter.clear()
