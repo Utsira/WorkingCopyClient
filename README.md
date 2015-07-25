@@ -6,7 +6,7 @@ A light Codea client for committing code to Working Copy, a full iOS Git client.
 
 ## Installation
 
-1. Install Working Copy on your iPad 
+1. Install Working Copy on your iPad.
 
 2. Set up some repositories in Working Copy to store your code. If you have a remote host on GutHub, BitBucket, your local server etc then you can clone your existing repositories. Otherwise you can initialise local repos on your device, and push them to the remote host later. Give large projects their own repository with the same name as their project name in Codea.[^note1] To store smaller projects that don't need their own repository, set up a repository called "Codea". This will save you having to set up repositories for every single Codea project.
 
