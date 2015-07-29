@@ -1,6 +1,8 @@
 -- Working Copy Client
 
 local workingCopyKey = readGlobalData("workingCopyKey", "")
+local workingCopyPushIAP = readGlobalData("workingCopyPushIAP", false)
+--local workingCopyRepoName = readLocalData("")
 --print ("Working Copy key", workingCopyKey)
 
 local function urlencode(str)
@@ -13,44 +15,47 @@ local function urlencode(str)
     return str
 end
 
+local function concatURL(url1, url2, sep)
+    local sep = sep or "&x-success="
+    return url1..sep..urlencode(url2) --to chain urls, must be double-encoded.
+end
+
+local function createCommitURL(repo, limit, path)
+    if path then path = "&path="..path..".lua" else path = "" end
+    local commitURL= "working-copy://x-callback-url/commit/?key="..workingCopyKey.."&repo="..repo..path.."&limit="..limit.."&message="..urlencode(commitMessage)
+    
+    if workingCopyPushIAP then --add push command
+        commitURL = concatURL(commitURL, "working-copy://x-callback-url/push/?key="..workingCopyKey.."&repo="..repo)
+    end
+    return commitURL
+end
+
 local function commitSingleFile()   
     --concatenate project tabs in Codea "paste into project" format and place in pasteboard
     local tabs = listProjectTabs()
     local tabString = ""
     for i,tabName in ipairs(tabs) do
-        local tab=readProjectTab(tabName)
-
-        tabString = tabString.."--# "..tabName.."\n"..tab.."\n\n"
+        tabString = tabString.."--# "..tabName.."\n"..readProjectTab(tabName).."\n\n"
         print(i,tabName)
     end
-    tabString = urlencode(tabString) --encode if passing code in URL, using &text="..tabString
-   -- pasteboard.copy(tabString) --avoid encoding by placing code in pasteboard
     
     --get project name
     local projectName = urlencode(string.match(readProjectTab("Main"), "^%s*%-%-%s*(.-)\n") or "My Project")
-
-    --encode commit message
-    local commitEncode = urlencode(commitMessage)
-    --build URL chain, starting from end
-   -- local openPageURL = "working-copy://open?repo=Codea&path="..projectName..".lua&mode=content"
-    local commitURL = urlencode("working-copy://x-callback-url/commit/?key="..workingCopyKey.."&repo=Codea&path="..projectName..".lua&limit=1&message="..commitEncode) --to chain urls, must be double-encoded. .."&x-success="..urlencode("codea://")
     
-    local totalURL = "working-copy://x-callback-url/write/?key="..workingCopyKey.."&repo=Codea&path="..projectName..".lua&uti=public.txt&text="..tabString.."&x-success="..commitURL --
-    openURL(totalURL) 
-    print(totalURL)
+    --build URL chain, starting from end
+    local commitURL = createCommitURL("Codea", 1, projectName)   
+    local writeURL = "working-copy://x-callback-url/write/?key="..workingCopyKey.."&repo=Codea&path="..projectName..".lua&uti=public.txt&text="..urlencode(tabString)
+    openURL(concatURL(writeURL, commitURL)) 
     print(projectName.." saved")
 end
 
 local function commitMultiFile()   
     --get project name
     local projectName = string.match(readProjectTab("Main"), "^%s*%-%-%s*(.-)\n") or "My Project"
-    projectName = urlencode(string.gsub(projectName, "%s", ""))
-    
+    projectName = urlencode(string.gsub(projectName, "%s", ""))    
     -- build URL, starting from the end of the chain    
-    --add commit command
-    local commitEncode = urlencode(commitMessage)
-    local totalURL = "working-copy://x-callback-url/commit/?key="..workingCopyKey.."&repo="..projectName.."&limit=999&message="..commitEncode
-  --  local totalURL = "working-copy://x-callback-url/commit/?message="..commitEncode
+    
+    local totalURL = createCommitURL(projectName, 999)
     print(totalURL)
     local tabs = listProjectTabs() --get project tab names
     for i=#tabs,1,-1 do --iterate through in reverse order
@@ -64,9 +69,9 @@ local function commitMultiFile()
             tabName = "tabs/"..tabName..".lua"
         end
              
-        local newLink = "working-copy://x-callback-url/write/?key="..workingCopyKey.."&repo="..projectName.."&path="..tabName.."&uti=public.txt&text="..urlencode(tab).."&x-success="    --the write command
+        local newLink = "working-copy://x-callback-url/write/?key="..workingCopyKey.."&repo="..projectName.."&path="..tabName.."&uti=public.txt&text="..urlencode(tab)    --the write command
        -- local newLink = "working-copy://x-callback-url/write/?path="..tabName.."&text="..urlencode(tab).."&x-success="    --the write command
-        totalURL = newLink..urlencode(totalURL) --each link in chain has to be re-encoded
+        totalURL = concatURL(newLink, totalURL) --each link in chain has to be re-encoded
         print(i,tabName, totalURL)
     end
         
@@ -76,11 +81,24 @@ local function commitMultiFile()
 end
 
 local function WorkingCopyClient()
+    local function WorkingCopySettings()
+        parameter.clear()
+        output.clear()
+        print([[
+    SET UP
+    ======
+    1. In Working Copy settings, turn on "URL Callbacks" and copy the URL key to the clipboard. Paste the key into the workingCopyKey box. 
+    2. If you have bought the push IAP in Working Copy (recommended), set workingCopyPushIAP to true. This enables to sync the local repositories on your iPad with remote hosts on GitHub, BitBucket, your computer etc.]]
+        )
+        parameter.text("workingCopyKey", workingCopyKey, function(v) saveGlobalData("workingCopyKey", v) end)
+        parameter.boolean("workingCopyPushIAP", workingCopyPushIAP, function(v) saveGlobalData("workingCopyPushIAP", v) end)
+        parameter.action("Return", WorkingCopyClient)
+    end
     parameter.clear()
     parameter.text("commitMessage", "")
     parameter.action("Commit as single file", commitSingleFile)
     parameter.action("Commit as multiple files", commitMultiFile)
-    parameter.text("workingCopyKey", workingCopyKey, function(v) saveGlobalData("workingCopyKey", v) end)
+    parameter.action("Set up", WorkingCopySettings)
     parameter.action("Exit Working Copy Client", parameter.clear)
 end
 
