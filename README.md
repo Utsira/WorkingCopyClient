@@ -20,9 +20,9 @@ A light Codea client for committing code to Working Copy, a full iOS Git client.
 
 2. The first time you run Working Copy Client within a Codea project, go into Working Copy client set up, and enter:
 
- a. the repository name that you would like to sync to. There is a button to autopopulate the repository name with the name of the Codea project. This also places the name in the clipboard (in case you haven't actually set up the repository yet, so you can move across to Working Copy and paste the title into the new repo name field).
+  a. the repository name that you would like to sync to. There is a button to autopopulate the repository name with the name of the Codea project. This also places the name in the clipboard (in case you haven't actually set up the repository yet, so you can move across to Working Copy and paste the title into the new repo name field).
 
- b. whether you would like to push this project as a single file in Codea's "paste-into-project" format, or as multiple files:
+  b. whether you would like to push this project as a single file in Codea's "paste-into-project" format, or as multiple files:
 
   - "single file" concatenates your project using Codea's "paste into project" format `--# tab name` and pushes it by default to the "Codea" repository in Working Copy (although you can change the repository name to whatever you like), naming the file after its Codea project name.[^note1] This is appropriate for smaller projects. To restore a previous version, you can copy the file from Working Copy (share pane > Copy), and in Codea, "paste into project"
 

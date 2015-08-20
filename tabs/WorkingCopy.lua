@@ -119,23 +119,30 @@ local function WorkingCopyClient()
         parameter.clear()
         output.clear()
         print([[
-    SET UP
-    ======
+    GLOBAL SETTINGS
+    ===============
     1. In Working Copy settings, turn on "URL Callbacks" and copy the URL key to the clipboard. Paste the key into the workingCopyKey box. 
-    2. If you have bought the push IAP in Working Copy (recommended), set workingCopyPushIAP to true. This enables to sync the local repositories on your iPad with remote hosts on GitHub, BitBucket, your computer etc.]]
+    2. If you have bought the push IAP in Working Copy (recommended), set workingCopyPushIAP to true. This enables to sync the local repositories on your iPad with remote hosts on GitHub, BitBucket, your computer etc.
+    PROJECT SETTINGS
+    ================
+    3. Whether you want to push this project as a concatena-ed single file, or as multiple files
+    4. Repository name
+    ]]
         )
         parameter.text("workingCopyKey", workingCopyKey, function(v) saveGlobalData("workingCopyKey", v) end)
-        parameter.boolean("workingCopyPushIAP", workingCopyPushIAP, function(v) saveGlobalData("workingCopyPushIAP", v) end)
-        parameter.boolean("Save_this_project_as_single_file", workingCopySingleFile, function(v) saveLocalData("workingCopySingleFile", v) end)
-        parameter.text("Repository_name", workingCopyRepoName, function(v) saveLocalData("workingCopyRepoName", v) end)
+        parameter.boolean("workingCopyPushIAP", workingCopyPushIAP, function(v) saveGlobalData("workingCopyPushIAP", v) workingCopyPushIAP = v end)
+        parameter.boolean("Save_this_project_as_single_file", workingCopySingleFile, function(v) saveLocalData("workingCopySingleFile", v) workingCopySingleFile = v end)
+        parameter.text("Repository_name", workingCopyRepoName, function(v) saveLocalData("workingCopyRepoName", v) workingCopyRepoName = v end)
         parameter.action("Set repo name to project name", function()
             local projectName = string.match(readProjectTab("Main"), "^%s*%-%-%s*(.-)\n") or "MyProject"
             projectName = string.gsub(projectName, "%s", "")
             Repository_name = projectName
             saveLocalData("workingCopyRepoName", projectName)
+            workingCopyRepoName = projectName
             pasteboard.copy(projectName)
             Save_this_project_as_single_file=false
             saveLocalData("workingCopySingleFile", false)
+            workingCopySingleFile = false
             print ("Repository name is now in clipboard")
         end)
         parameter.action("Return", WorkingCopyClient)
