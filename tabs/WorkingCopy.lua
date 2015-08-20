@@ -1,8 +1,9 @@
--- Working Copy Client
+-- Working Copy
 
 local workingCopyKey = readGlobalData("workingCopyKey", "")
 local workingCopyPushIAP = readGlobalData("workingCopyPushIAP", false)
---local workingCopyRepoName = readLocalData("")
+local workingCopyRepoName = readLocalData("workingCopyRepoName", "Codea")
+local workingCopySingleFile = readLocalData("workingCopySingleFile", true)
 --print ("Working Copy key", workingCopyKey)
 
 local function urlencode(str)
@@ -30,6 +31,10 @@ local function createCommitURL(repo, limit, path)
     return commitURL
 end
 
+local function createWriteURL(repo, path, txt)
+    return "working-copy://x-callback-url/write/?key="..workingCopyKey.."&repo="..repo.."&path="..path.."&uti=public.txt&text="..urlencode(txt)    --the write command
+end
+--Single file, to Codea repository
 local function commitSingleFile()   
     --concatenate project tabs in Codea "paste into project" format and place in pasteboard
     local tabs = listProjectTabs()
@@ -43,19 +48,40 @@ local function commitSingleFile()
     local projectName = urlencode(string.match(readProjectTab("Main"), "^%s*%-%-%s*(.-)\n") or "My Project")
     
     --build URL chain, starting from end
-    local commitURL = createCommitURL("Codea", 1, projectName)   
-    local writeURL = "working-copy://x-callback-url/write/?key="..workingCopyKey.."&repo=Codea&path="..projectName..".lua&uti=public.txt&text="..urlencode(tabString)
+    local commitURL = createCommitURL(workingCopyRepoName, 1, projectName)   
+    local writeURL = createWriteURL(workingCopyRepoName, projectName..".lua", tabString) --"working-copy://x-callback-url/write/?key="..workingCopyKey.."&repo=Codea&path="..projectName..".lua&uti=public.txt&text="..urlencode(tabString)
     openURL(concatURL(writeURL, commitURL)) 
     print(projectName.." saved")
 end
 
+local function readProjectFile(project, name, warn)
+    local path = os.getenv("HOME") .. "/Documents/"
+    local file = io.open(path .. project .. ".codea/" .. name,"r")
+    if file then
+        local plist = file:read("*all")
+        file:close()
+        return plist
+    elseif warn then
+        print("WARNING: unable to read " .. name)
+    end
+end
+
+local function readProjectPlist(project)
+    return readProjectFile(project, "Info.plist", true)
+end
+
+--multi-file, to dedicated repository
 local function commitMultiFile()   
     --get project name
     local projectName = string.match(readProjectTab("Main"), "^%s*%-%-%s*(.-)\n") or "My Project"
-    projectName = urlencode(string.gsub(projectName, "%s", ""))    
-    -- build URL, starting from the end of the chain    
     
-    local totalURL = createCommitURL(projectName, 999)
+    --get plist file with tabOrder
+    local plist = readProjectPlist(projectName)
+    print(plist)
+    -- build URL, starting from the end of the chain    
+     projectName = urlencode(string.gsub(projectName, "%s", ""))  
+    
+    local totalURL = concatURL(createWriteURL(workingCopyRepoName, "Info.plist", plist), createCommitURL(workingCopyRepoName, 999))
     print(totalURL)
     local tabs = listProjectTabs() --get project tab names
     for i=#tabs,1,-1 do --iterate through in reverse order
@@ -69,15 +95,23 @@ local function commitMultiFile()
             tabName = "tabs/"..tabName..".lua"
         end
              
-        local newLink = "working-copy://x-callback-url/write/?key="..workingCopyKey.."&repo="..projectName.."&path="..tabName.."&uti=public.txt&text="..urlencode(tab)    --the write command
-       -- local newLink = "working-copy://x-callback-url/write/?path="..tabName.."&text="..urlencode(tab).."&x-success="    --the write command
+        local newLink = createWriteURL(workingCopyRepoName, tabName, tab) --"working-copy://x-callback-url/write/?key="..workingCopyKey.."&repo="..projectName.."&path="..tabName.."&uti=public.txt&text="..urlencode(tab)    --the write command
+       
         totalURL = concatURL(newLink, totalURL) --each link in chain has to be re-encoded
         print(i,tabName, totalURL)
     end
         
     openURL(totalURL) 
 
-    print(projectName.." saved")
+    print(workingCopyRepoName.." saved")
+end
+
+local function WorkingCopyCommit()
+    if workingCopySingleFile then
+        commitSingleFile()
+    else
+        commitMultiFile()
+    end
 end
 
 local function WorkingCopyClient()
@@ -92,12 +126,23 @@ local function WorkingCopyClient()
         )
         parameter.text("workingCopyKey", workingCopyKey, function(v) saveGlobalData("workingCopyKey", v) end)
         parameter.boolean("workingCopyPushIAP", workingCopyPushIAP, function(v) saveGlobalData("workingCopyPushIAP", v) end)
+        parameter.boolean("Save_this_project_as_single_file", workingCopySingleFile, function(v) saveLocalData("workingCopySingleFile", v) end)
+        parameter.text("Repository_name", workingCopyRepoName, function(v) saveLocalData("workingCopyRepoName", v) end)
+        parameter.action("Set repo name to project name", function()
+            local projectName = string.match(readProjectTab("Main"), "^%s*%-%-%s*(.-)\n") or "MyProject"
+            projectName = string.gsub(projectName, "%s", "")
+            Repository_name = projectName
+            saveLocalData("workingCopyRepoName", projectName)
+            pasteboard.copy(projectName)
+            Save_this_project_as_single_file=false
+            saveLocalData("workingCopySingleFile", false)
+            print ("Repository name is now in clipboard")
+        end)
         parameter.action("Return", WorkingCopyClient)
     end
     parameter.clear()
     parameter.text("commitMessage", "")
-    parameter.action("Commit as single file", commitSingleFile)
-    parameter.action("Commit as multiple files", commitMultiFile)
+    parameter.action("Commit", WorkingCopyCommit)
     parameter.action("Set up", WorkingCopySettings)
     parameter.action("Exit Working Copy Client", parameter.clear)
 end
