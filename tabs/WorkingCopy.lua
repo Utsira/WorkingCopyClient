@@ -1,9 +1,11 @@
 -- Working Copy
 
+--[[
 local workingCopyKey = readGlobalData("workingCopyKey", "")
 local workingCopyPushIAP = readGlobalData("workingCopyPushIAP", false)
 local workingCopyRepoName = readLocalData("workingCopyRepoName", "Codea")
-local workingCopySingleFile = readLocalData("workingCopySingleFile", true)
+local Save_project_as_single_file = readLocalData("Save_project_as_single_file", true)
+  ]]
 --print ("Working Copy key", workingCopyKey)
 
 local function urlencode(str)
@@ -77,12 +79,12 @@ local function commitMultiFile()
     
     --get plist file with tabOrder
     local plist = readProjectPlist(projectName)
-    print(plist)
+  --  print(plist)
     -- build URL, starting from the end of the chain    
      projectName = urlencode(string.gsub(projectName, "%s", ""))  
     
     local totalURL = concatURL(createWriteURL(workingCopyRepoName, "Info.plist", plist), createCommitURL(workingCopyRepoName, 999))
-    print(totalURL)
+  --  print(totalURL)
     local tabs = listProjectTabs() --get project tab names
     for i=#tabs,1,-1 do --iterate through in reverse order
         local tabName = tabs[i]
@@ -98,7 +100,7 @@ local function commitMultiFile()
         local newLink = createWriteURL(workingCopyRepoName, tabName, tab) --"working-copy://x-callback-url/write/?key="..workingCopyKey.."&repo="..projectName.."&path="..tabName.."&uti=public.txt&text="..urlencode(tab)    --the write command
        
         totalURL = concatURL(newLink, totalURL) --each link in chain has to be re-encoded
-        print(i,tabName, totalURL)
+      --  print(i,tabName, totalURL)
     end
         
     openURL(totalURL) 
@@ -107,7 +109,7 @@ local function commitMultiFile()
 end
 
 local function WorkingCopyCommit()
-    if workingCopySingleFile then
+    if Save_project_as_single_file then
         commitSingleFile()
     else
         commitMultiFile()
@@ -122,27 +124,37 @@ local function WorkingCopyClient()
     GLOBAL SETTINGS
     ===============
     1. In Working Copy settings, turn on "URL Callbacks" and copy the URL key to the clipboard. Paste the key into the workingCopyKey box. 
-    2. If you have bought the push IAP in Working Copy (recommended), set workingCopyPushIAP to true. This enables to sync the local repositories on your iPad with remote hosts on GitHub, BitBucket, your computer etc.
     PROJECT SETTINGS
     ================
+    2. Whether to push the local repositories on your iPad to remote hosts on GitHub, BitBucket, your computer etc. Requires the push IAP in Working Copy (recommended).
     3. Whether you want to push this project as a concatena-ed single file, or as multiple files
     4. Repository name
     ]]
         )
-        parameter.text("workingCopyKey", workingCopyKey, function(v) saveGlobalData("workingCopyKey", v) end)
-        parameter.boolean("workingCopyPushIAP", workingCopyPushIAP, function(v) saveGlobalData("workingCopyPushIAP", v) workingCopyPushIAP = v end)
-        parameter.boolean("Save_this_project_as_single_file", workingCopySingleFile, function(v) saveLocalData("workingCopySingleFile", v) workingCopySingleFile = v end)
-        parameter.text("Repository_name", workingCopyRepoName, function(v) saveLocalData("workingCopyRepoName", v) workingCopyRepoName = v end)
+        parameter.text("workingCopyKey", 
+            readGlobalData("workingCopyKey", ""), 
+            function(v) saveGlobalData("workingCopyKey", v) end)
+        
+        parameter.boolean("Push_to_remote_repo", 
+            readLocalData("Push_to_remote_repo", false), 
+            function(v) saveLocalData("Push_to_remote_repo", v) Push_to_remote_repo = v end)
+        
+        parameter.boolean("Save_project_as_single_file", 
+            readLocalData("Save_project_as_single_file", true), 
+            function(v) saveLocalData("Save_project_as_single_file", v) Save_project_as_single_file = v end)
+        
+        parameter.text("workingCopyRepoName", 
+            readLocalData("workingCopyRepoName", "Codea"), 
+            function(v) saveLocalData("workingCopyRepoName", v) workingCopyRepoName = v end)
+        
         parameter.action("Set repo name to project name", function()
             local projectName = string.match(readProjectTab("Main"), "^%s*%-%-%s*(.-)\n") or "MyProject"
             projectName = string.gsub(projectName, "%s", "")
-            Repository_name = projectName
-            saveLocalData("workingCopyRepoName", projectName)
             workingCopyRepoName = projectName
+            saveLocalData("workingCopyRepoName", projectName)
             pasteboard.copy(projectName)
-            Save_this_project_as_single_file=false
-            saveLocalData("workingCopySingleFile", false)
-            workingCopySingleFile = false
+            Save_project_as_single_file=false
+            saveLocalData("Save_project_as_single_file", false)
             print ("Repository name is now in clipboard")
         end)
         parameter.action("Return", WorkingCopyClient)
