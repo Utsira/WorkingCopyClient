@@ -24,7 +24,7 @@ local function createCommitURL(repo, limit, path)
     if path then path = "&path="..path..".lua" else path = "" end
     local commitURL= "working-copy://x-callback-url/commit/?key="..workingCopyKey.."&repo="..repo..path.."&limit="..limit.."&message="..urlencode(commitMessage)
     
-    if workingCopyPushIAP then --add push command
+    if Push_to_remote_repo then --add push command
         commitURL = concatURL(commitURL, "working-copy://x-callback-url/push/?key="..workingCopyKey.."&repo="..repo)
     end
     return commitURL
