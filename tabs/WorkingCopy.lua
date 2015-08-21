@@ -1,12 +1,9 @@
 -- Working Copy
 
---[[
-local workingCopyKey = readGlobalData("workingCopyKey", "")
-local workingCopyPushIAP = readGlobalData("workingCopyPushIAP", false)
-local workingCopyRepoName = readLocalData("workingCopyRepoName", "Codea")
-local Save_project_as_single_file = readLocalData("Save_project_as_single_file", true)
-  ]]
---print ("Working Copy key", workingCopyKey)
+workingCopyKey = readGlobalData("workingCopyKey", "")
+Push_to_remote_repo = readLocalData("Push_to_remote_repo", false)
+Save_project_as_single_file = readLocalData("Save_project_as_single_file", true)
+workingCopyRepoName = readLocalData("workingCopyRepoName", "Codea")
 
 local function urlencode(str)
     str = string.gsub (str, "\n", "\r\n")
@@ -132,19 +129,19 @@ local function WorkingCopyClient()
     ]]
         )
         parameter.text("workingCopyKey", 
-            readGlobalData("workingCopyKey", ""), 
+            workingCopyKey, 
             function(v) saveGlobalData("workingCopyKey", v) end)
         
-        parameter.boolean("Push_to_remote_repo", 
-            readLocalData("Push_to_remote_repo", false), 
+        parameter.boolean("Push_to_remote_repo",             
+            Push_to_remote_repo, 
             function(v) saveLocalData("Push_to_remote_repo", v) Push_to_remote_repo = v end)
         
         parameter.boolean("Save_project_as_single_file", 
-            readLocalData("Save_project_as_single_file", true), 
+            Save_project_as_single_file, 
             function(v) saveLocalData("Save_project_as_single_file", v) Save_project_as_single_file = v end)
         
         parameter.text("workingCopyRepoName", 
-            readLocalData("workingCopyRepoName", "Codea"), 
+            workingCopyRepoName, 
             function(v) saveLocalData("workingCopyRepoName", v) workingCopyRepoName = v end)
         
         parameter.action("Set repo name to project name", function()
