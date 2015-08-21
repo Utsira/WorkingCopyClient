@@ -128,6 +128,8 @@ local function WorkingCopyClient()
     4. Repository name
     ]]
         )
+        parameter.action("< Back", WorkingCopyClient)
+        
         parameter.text("workingCopyKey", 
             workingCopyKey, 
             function(v) saveGlobalData("workingCopyKey", v) end)
@@ -154,7 +156,7 @@ local function WorkingCopyClient()
             saveLocalData("Save_project_as_single_file", false)
             print ("Repository name is now in clipboard")
         end)
-        parameter.action("Return", WorkingCopyClient)
+        
     end
     parameter.clear()
     parameter.text("commitMessage", "")
