@@ -33,6 +33,7 @@ end
 local function createWriteURL(repo, path, txt)
     return "working-copy://x-callback-url/write/?key="..workingCopyKey.."&repo="..repo.."&path="..path.."&uti=public.txt&text="..urlencode(txt)    --the write command
 end
+
 --Single file, to Codea repository
 local function commitSingleFile()   
     --concatenate project tabs in Codea "paste into project" format and place in pasteboard
@@ -80,7 +81,8 @@ local function commitMultiFile()
     -- build URL, starting from the end of the chain    
      projectName = urlencode(string.gsub(projectName, "%s", ""))  
     
-    local totalURL = concatURL(createWriteURL(workingCopyRepoName, "Info.plist", plist), createCommitURL(workingCopyRepoName, 999))
+   -- local totalURL = concatURL(createWriteURL(workingCopyRepoName, "Info.plist", plist), createCommitURL(workingCopyRepoName, 999))
+    local totalURL =  createCommitURL(workingCopyRepoName, 999)
   --  print(totalURL)
     local tabs = listProjectTabs() --get project tab names
     for i=#tabs,1,-1 do --iterate through in reverse order
@@ -128,7 +130,7 @@ local function WorkingCopyClient()
     4. Repository name
     ]]
         )
-        parameter.action("< Back", WorkingCopyClient)
+        parameter.action("< Back to WorkingCopyClient", WorkingCopyClient)
         
         parameter.text("workingCopyKey", 
             workingCopyKey, 
