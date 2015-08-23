@@ -81,8 +81,8 @@ local function commitMultiFile()
     -- build URL, starting from the end of the chain    
      projectName = urlencode(string.gsub(projectName, "%s", ""))  
     
-   -- local totalURL = concatURL(createWriteURL(workingCopyRepoName, "Info.plist", plist), createCommitURL(workingCopyRepoName, 999))
-    local totalURL =  createCommitURL(workingCopyRepoName, 999)
+    local totalURL = concatURL(createWriteURL(workingCopyRepoName, "Info.plist", plist), createCommitURL(workingCopyRepoName, 999))
+  --  local totalURL =  createCommitURL(workingCopyRepoName, 999)
   --  print(totalURL)
     local tabs = listProjectTabs() --get project tab names
     for i=#tabs,1,-1 do --iterate through in reverse order
