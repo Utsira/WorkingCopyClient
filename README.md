@@ -2,6 +2,8 @@
 
 # Working Copy Client
 
+### NB this client only uses x-callbacks, and hence is push only. Please see https://github.com/Utsira/WorkingCopyCodeaClient for the WebDAV client that supports pull and push.
+
 A light Codea client for committing code to Working Copy, a full iOS Git client. The free version supports local Git commits only. To push to a remote host such as GitHub, BitBucket, or your own server, please buy the full version of Working Copy.
 
 ## Installation
